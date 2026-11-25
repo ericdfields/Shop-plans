@@ -1,0 +1,44 @@
+<title>{{TITLE}}</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+{{CSS}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+  </header>
+  <div id="stage"><span class="hint">Drag to orbit · pinch or scroll to zoom</span></div>
+  <img id="snap" alt="">
+  <div class="controls" id="toggles"></div>
+  <div class="grid">
+    <section id="params"></section>
+    <div class="cutcol" id="cutlists"></div>
+    <section style="grid-column:1/-1" class="checks" id="checks"></section>
+    <section style="grid-column:1/-1" class="build">
+      <h2>Assembly</h2>
+      <div id="assembly"></div>
+    </section>
+    <section style="grid-column:1/-1" class="sheets">
+      <h2>Sheet layouts</h2>
+      <div class="legend" id="legend"></div>
+      <div id="sheetlist"></div>
+      <p class="note" id="sheetnote"></p>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{{CORE}}
+</script>
+<script>
+{{PLAN}}
+</script>
+<script>
+{{ENGINE}}
+</script>

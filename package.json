@@ -1,0 +1,14 @@
+{
+  "name": "shop-plans",
+  "private": true,
+  "description": "Parametric furniture plans: 3D viewer, cut lists, sheet layouts, checks, illustrated one-step-per-page instructions.",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "verify": "node tools/verify.mjs",
+    "print": "node tools/print.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0",
+    "three": "0.128.0"
+  }
+}

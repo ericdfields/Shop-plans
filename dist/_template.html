@@ -1,0 +1,706 @@
+<title>Plywood Bench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* shop-plans engine styles. Layout: shop-drawing sheet. 3D model on top, parameters and cut lists, checks, one-step-per-page instructions, sheet layouts. */
+:root{
+  --bg:#f3f1ec; --panel:#fbfaf7; --fg:#22211d; --muted:#6b6860; --line:#d9d5cb;
+  --accent:#9a5b22; --ply:#d9bb8f; --top:#c79f6b; --front:#e3c79c; --drawer:#7c8592; --tank:#8cbfe0; --stage:#e8e4db;
+  --display:"Archivo",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1a1916; --panel:#22211d; --fg:#ece8df; --muted:#a29d92; --line:#3a3832;
+  --accent:#e09a52; --stage:#2a2823; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1a1916; --panel:#22211d; --fg:#ece8df; --muted:#a29d92; --line:#3a3832;
+  --accent:#e09a52; --stage:#2a2823; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+h1{font-family:var(--display);font-weight:700;font-size:1.6rem;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:2px 0 0;font-family:var(--mono);font-size:.82rem}
+#stage{position:relative;width:100%;aspect-ratio:16/10;max-width:100%;background:var(--stage);border:1px solid var(--line);border-radius:6px;overflow:hidden;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%}
+.hint{position:absolute;left:10px;bottom:8px;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.controls label{display:flex;gap:6px;align-items:center;font-size:.9rem}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px}
+@media (max-width:720px){.grid{grid-template-columns:minmax(0,1fr)}}
+section{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;min-width:0}
+h2{font-family:var(--display);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0 0 10px}
+.params{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.params label{display:grid;gap:3px;font-size:.82rem;color:var(--muted)}
+.params input{font-family:var(--mono);font-size:.95rem;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg);width:100%;box-sizing:border-box}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.stock{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.92rem}
+.stock label{display:flex;gap:6px;align-items:center}
+.params input:disabled{opacity:.7}
+.dims{margin-top:12px;font-family:var(--mono);font-size:.85rem;display:grid;gap:2px;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n{font-family:var(--mono);font-size:.88rem}
+.note{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+.warn{color:var(--accent);font-size:.85rem;margin:8px 0 0}
+#snap{display:none}
+.sheets{display:grid;gap:16px}
+#sheetlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.sheetgroup{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;min-width:0}
+.sheetgroup.wide{grid-column:1/-1}
+@media (max-width:720px){#sheetlist{grid-template-columns:minmax(0,1fr)}.sheetgroup.wide{overflow-x:auto}.sheetgroup.wide .sheet-svg{min-width:640px}}
+figure{margin:0;min-width:0}
+figcaption{font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sheet-svg{display:block;width:100%;height:auto;max-width:100%}
+.sv-sheet{fill:url(#waste);stroke:var(--fg);stroke-width:.12}
+.sv-waste-bg{fill:var(--panel)}
+.sv-hatch{stroke:var(--line);stroke-width:.25}
+.sv-part{stroke:var(--fg);stroke-width:.1}
+.sv-carcass{fill:var(--ply)} .sv-top{fill:var(--top)} .sv-front{fill:var(--front)}
+.sw{display:inline-block;width:12px;height:12px;border:1px solid var(--fg);vertical-align:-2px;margin-right:6px}
+.sw.sv-carcass{background:var(--ply)} .sw.sv-top{background:var(--top)} .sw.sv-front{background:var(--front)}
+.sw-off{background:var(--panel);background-image:repeating-linear-gradient(45deg,var(--line) 0 1px,transparent 1px 5px)}
+.cutcol{display:grid;gap:20px;min-width:0;align-content:start}
+.checklist{list-style:none;margin:0;padding:0;display:grid}
+.checklist li{display:grid;grid-template-columns:1.4em minmax(0,1fr) minmax(0,1.2fr);gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.checklist .ck{font-weight:700}.checklist .ok .ck{color:#2f7d3a}.checklist .bad .ck{color:var(--signal)}.checklist .bad{color:var(--signal)}
+.checklist .cd{font-family:var(--mono);font-size:.78rem;color:var(--muted);overflow-wrap:anywhere}
+@media (max-width:640px){.checklist li{grid-template-columns:1.4em minmax(0,1fr)}.checklist .cd{grid-column:2}}
+.sv-name{font-family:var(--body);font-weight:600;fill:#2a2015}
+.sv-dim{font-family:var(--mono);fill:#2a2015}
+.sv-tick{stroke:var(--muted);stroke-width:.08}
+.sv-ruler{font-family:var(--mono);fill:var(--muted);font-size:1.5px}
+td.lb{font-size:.8rem;color:var(--muted);white-space:normal;min-width:12em}
+.build b{font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border:1px solid var(--fg);vertical-align:-2px;margin-right:6px}
+
+/* Print: light shop sheet, model snapshot, full-width tables that never clip. */
+@page{size:letter portrait;margin:.5in}
+@media print{
+  :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{
+    --bg:#fff; --panel:#fff; --fg:#000; --muted:#444; --line:#999; --accent:#6b3d12; color-scheme:light}
+  html,body{background:#fff}
+  body{font-size:10.5pt}
+  .wrap{max-width:none;padding:0;gap:12pt;display:block}
+  .wrap>*+*{margin-top:12pt}
+  #stage,.controls,.hint{display:none}
+  .sheetgroup.wide{overflow:visible} .sheetgroup .sheet-svg{min-width:0}
+  #sheetlist{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .sheets section,figure{break-inside:avoid;page-break-inside:avoid}
+    .build section,.build{break-inside:auto}
+  #snap[src^="data:image/png"]{display:block;width:100%;max-height:3.4in;object-fit:contain;border:1px solid var(--line)}
+  .grid{display:block}
+  .grid>section+section{margin-top:12pt}
+  section{border:1px solid var(--line);border-radius:0;padding:8pt 10pt;break-inside:avoid;page-break-inside:avoid}
+  .tbl{overflow:visible}
+  table{width:100%;table-layout:auto}
+  th,td{white-space:normal;padding:3pt 6pt}
+  thead{display:table-header-group}
+  tr{break-inside:avoid;page-break-inside:avoid}
+  .params{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .params input{border:0;padding:0;background:none;-moz-appearance:textfield;appearance:textfield}
+  .params input::-webkit-inner-spin-button,.params input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  h1{font-size:16pt}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* Instructions: one step per page. Swiss grid, big step numerals, parts and hardware set like a bill of materials. */
+:root{--paper:#ffffff;--signal:#d23a17;--rule:#22211d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#22211d;--signal:#ff6a45;--rule:#ece8df}}
+:root[data-theme="dark"]{--paper:#22211d;--signal:#ff6a45;--rule:#ece8df}
+.build{padding:0;border:0;background:transparent}
+.build>h2{margin:0 0 10px}
+.stepper{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.stepper>*{min-width:0}
+.stepnav{display:flex;flex-wrap:nowrap;align-items:center;gap:6px}
+.sn-dots{display:flex;flex-wrap:nowrap;gap:4px;flex:1 1 0;min-width:0;overflow-x:auto;scrollbar-width:none}
+.sn-btn,.sn-dot,.sn-all{font-family:var(--mono);font-size:.85rem;min-width:36px;height:36px;padding:0 10px;border:1.5px solid var(--rule);background:var(--paper);color:var(--fg);cursor:pointer;border-radius:0;font-variant-numeric:tabular-nums}
+.sn-dot.on{background:var(--rule);color:var(--paper)}
+.sn-btn:disabled{opacity:.3;cursor:default}
+.sn-all{flex:none}
+.sn-btn,.sn-dot{flex:none}
+.sn-all[aria-pressed="true"]{background:var(--rule);color:var(--paper)}
+.sn-btn:hover:not(:disabled),.sn-dot:hover,.sn-all:hover{border-color:var(--signal)}
+.sn-btn:focus-visible,.sn-dot:focus-visible,.sn-all:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+@media screen{.stepper:not(.all) .stepcard:not(.on){display:none}}
+.stepcard{background:var(--paper);border-top:3px solid var(--rule);padding-block:30px 24px;padding-inline:clamp(14px,3vw,28px);display:grid;gap:18px;min-width:0}
+.sc-head{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;gap:18px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.sc-num{font-family:var(--display);font-weight:700;font-size:clamp(4rem,10vw,6.5rem);line-height:.74;color:var(--signal);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.sc-eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sc-titles h3{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,3.2vw,2rem);letter-spacing:-.01em;line-height:1.05;margin:4px 0 0;text-wrap:balance}
+.sc-body{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,8fr);gap:24px;align-items:start}
+@media (max-width:760px){.sc-body{grid-template-columns:minmax(0,1fr)}.sc-fig{order:-1}}
+.sc-need h4{font-family:var(--mono);font-size:.68rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;padding-top:8px;border-top:1px solid var(--rule)}
+.sc-need h4~h4,.sc-need div+div h4{margin-top:16px}
+.sc-need ul{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.need-parts li{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
+.need-parts .lab{font-family:var(--mono);font-weight:500;font-size:.88rem}
+.need-parts .dm{font-family:var(--mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.need-parts .grp{grid-column:1/-1;font-family:var(--mono);font-size:.8rem}
+.need-parts .nt{grid-column:1/-1;font-size:.78rem;color:var(--signal)}
+.need-hw li{display:grid;grid-template-columns:3.4em minmax(0,1fr);gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.need-hw .qty{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+.need-tools li{padding:4px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+/* Step 0 has no picture: hardware and tools side by side as two ruled lists, checks below. */
+.sc-body--plain{grid-template-columns:minmax(0,1fr)}
+.sc-body--plain .sc-need{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:0 32px;align-items:start}
+.sc-body--plain .sc-need div+div h4{margin-top:0}
+.sc-body--plain .sc-need>div{min-width:0}
+.sc-fig{margin:0;background:#fff;border:1px solid var(--line)}
+.sc-fig img{display:block;width:100%;height:auto;aspect-ratio:1440/780}
+.sc-fig figcaption{font-family:var(--mono);font-size:.74rem;color:var(--muted);padding:6px 10px;border-top:1px solid var(--line)}
+.sc-acts{margin:0;padding:0;list-style:none;counter-reset:a;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px 28px}
+.sc-acts li{counter-increment:a;display:grid;grid-template-columns:1.8em minmax(0,1fr);gap:6px;font-size:.95rem;line-height:1.45;max-width:62ch}
+.sc-acts li::before{content:counter(a,lower-alpha);font-family:var(--mono);font-weight:500;color:var(--signal);font-size:.9rem;padding-top:1px}
+.sc-acts b{font-weight:600}
+@media print{
+  .stepnav{display:none}
+  .build>h2{display:none}
+  .stepcard{display:grid!important;grid-template-columns:minmax(0,2.3fr) minmax(0,3fr);grid-template-areas:"head head" "fig fig" "need acts";break-before:page;page-break-before:always;break-inside:avoid;page-break-inside:avoid;padding:22pt 0 0;border-top-width:2.5pt;gap:14pt 22pt;background:#fff}
+  .sc-head{grid-area:head}
+  .sc-body{display:contents}
+  .sc-need{grid-area:need}
+  .sc-fig{grid-area:fig}
+  .sc-acts{grid-area:acts;align-content:start}
+  .sc-num{font-size:62pt;color:#c4351a}
+  .sc-titles h3{font-size:20pt}
+  .sc-fig{order:0;background:#fff}
+  .sc-fig{width:6.2in;justify-self:center;border:0}
+  .sc-fig figcaption{border-top:0;padding:4pt 0 0}
+  .sc-fig img{max-height:none}
+  #step-0 .sc-fig img{max-height:2.3in}
+  #step-0{grid-template-areas:"head head" "need need" "acts acts"}
+  #step-0 .sc-acts{grid-template-columns:1fr 1fr;gap:8pt 22pt}
+  .sc-acts{grid-template-columns:1fr;gap:7pt}
+  .sc-acts li{font-size:10pt}
+  .need-parts li,.need-hw li{padding:2.5pt 0}
+  .need-parts .lab,.need-hw li{font-size:8.5pt}
+  .need-parts .dm{font-size:8pt}
+  .sc-need ul.need-tools{display:block;columns:2;column-gap:12pt}
+  .need-tools li{font-size:8.5pt;padding:2.5pt 0;break-inside:avoid}
+  #step-0 .sc-need ul.need-tools{columns:1}
+}
+  .checks{break-inside:auto}
+
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+  </header>
+  <div id="stage"><span class="hint">Drag to orbit · pinch or scroll to zoom</span></div>
+  <img id="snap" alt="">
+  <div class="controls" id="toggles"></div>
+  <div class="grid">
+    <section id="params"></section>
+    <div class="cutcol" id="cutlists"></div>
+    <section style="grid-column:1/-1" class="checks" id="checks"></section>
+    <section style="grid-column:1/-1" class="build">
+      <h2>Assembly</h2>
+      <div id="assembly"></div>
+    </section>
+    <section style="grid-column:1/-1" class="sheets">
+      <h2>Sheet layouts</h2>
+      <div class="legend" id="legend"></div>
+      <div id="sheetlist"></div>
+      <p class="note" id="sheetnote"></p>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// shop-plans core: pure functions shared by the browser engine and the node tools.
+// No DOM, no three.js. Units are inches.
+(function(root){
+"use strict";
+
+// Inches to a shop fraction: 1/16 by default, 1/32 only where asked.
+function frac(x,den=16){
+  const neg=x<0; x=Math.abs(x);
+  const s=Math.round(x*den); const w=Math.floor(s/den); let r=s%den,d=den;
+  while(r&&r%2===0){r/=2;d/=2}
+  const t=r?(w?`${w} ${r}/${d}"`:`${r}/${d}"`):`${w}"`;
+  return neg?"-"+t:t;
+}
+
+// Part box: [x,y,z,dx,dy,dz]. x = length (left to right), y = depth (front to back), z = up.
+const lo=p=>[p.box[0],p.box[1],p.box[2]], hi=p=>[p.box[0]+p.box[3],p.box[1]+p.box[4],p.box[2]+p.box[5]];
+
+// Cut size of a part: sorted [T, W, L], plus any deliberate allowance (cut tall, trim later).
+function cutDims(part){
+  const d=[part.box[3],part.box[4],part.box[5]].sort((a,b)=>a-b);
+  if(part.cutAdd)for(let i=0;i<3;i++)d[i]+=part.cutAdd[i]||0;
+  return d;
+}
+
+// Cut-list rows for one material. Parts with the same group collapse to one row with a quantity.
+function cutRows(model,material){
+  const rows=[], byGroup={};
+  for(const p of model.parts){
+    if(p.role!=="cut"||p.material!==material)continue;
+    const d=cutDims(p);
+    if(p.group){
+      const g=byGroup[p.group]||(byGroup[p.group]={name:p.group,qty:0,dims:d,labels:[],note:p.cutNote||""});
+      g.qty++;g.labels.push(p.id);
+      if(!g.added){rows.push(g);g.added=true}
+    } else rows.push({name:p.id,qty:1,dims:d,labels:[p.id],note:p.cutNote||""});
+  }
+  return rows;
+}
+
+// Guillotine sheet packer with saw kerf. Every cut runs edge to edge of the piece it splits,
+// so the layout can be made on a table saw or with a track saw.
+function packSheets(parts,W,H,kerf){
+  const sorts=[(a,b)=>b.w*b.h-a.w*a.h,(a,b)=>Math.max(b.w,b.h)-Math.max(a.w,a.h),(a,b)=>b.w-a.w,(a,b)=>b.h-a.h,(a,b)=>Math.min(b.w,b.h)-Math.min(a.w,a.h)];
+  const fits=[(f,w,h)=>f.w*f.h-w*h,(f,w,h)=>Math.min(f.w-w,f.h-h),(f,w,h)=>Math.max(f.w-w,f.h-h),(f)=>f.y*1000+f.x];
+  const splits=["short","long","horiz","vert"];
+  function attempt(order,fit,split){
+    const sheets=[],unplaced=[];
+    const newSheet=()=>{const s={free:[{x:0,y:0,w:W,h:H}],placed:[]};sheets.push(s);return s};
+    for(const p of order){
+      if((p.w>W||p.h>H)&&(p.grain||p.h>W||p.w>H)){unplaced.push(p);continue}
+      let ok=false;
+      for(let pass=0;pass<2&&!ok;pass++){
+        const cands=pass===0?sheets:[newSheet()];let best=null;
+        for(const s of cands)s.free.forEach((f,i)=>{
+          const opts=p.grain?[[p.w,p.h,false]]:[[p.w,p.h,false],[p.h,p.w,true]];
+          for(const [w,h,rot] of opts)if(w<=f.w+1e-9&&h<=f.h+1e-9){const sc=fit(f,w,h);if(!best||sc<best.sc)best={s,i,f,w,h,rot,sc}}
+        });
+        if(best){
+          const {s,i,f,w,h,rot}=best;s.placed.push({...p,x:f.x,y:f.y,w,h,rot});s.free.splice(i,1);
+          const rw=f.w-w-kerf,bh=f.h-h-kerf;
+          const horiz=split==="horiz"?true:split==="vert"?false:split==="short"?!(rw<bh):(rw<bh);
+          const add=r=>{if(r.w>0.01&&r.h>0.01)s.free.push(r)};
+          if(horiz){add({x:f.x,y:f.y+h+kerf,w:f.w,h:bh});add({x:f.x+w+kerf,y:f.y,w:rw,h})}
+          else{add({x:f.x+w+kerf,y:f.y,w:rw,h:f.h});add({x:f.x,y:f.y+h+kerf,w,h:bh})}
+          ok=true;
+        } else if(pass===1){sheets.pop();unplaced.push(p);ok=true}
+      }
+    }
+    return {sheets,unplaced};
+  }
+  let best=null;
+  for(const so of sorts)for(const fi of fits)for(const sp of splits){
+    const r=attempt([...parts].sort(so),fi,sp), last=r.sheets[r.sheets.length-1];
+    const off=last?Math.max(0,...last.free.map(f=>f.w*f.h)):0, key=[r.unplaced.length,r.sheets.length,-off];
+    if(!best||key[0]<best.key[0]||(key[0]===best.key[0]&&(key[1]<best.key[1]||(key[1]===best.key[1]&&key[2]<best.key[2]))))best={...r,key};
+  }
+  return best;
+}
+
+// Lay out every material on its sheet. Returns {material: {sheet, result}}.
+function sheetLayouts(plan,model,kerf){
+  const out={};
+  for(const [m,mat] of Object.entries(plan.materials)){
+    const parts=model.parts.filter(p=>p.role==="cut"&&p.material===m).map(p=>{const d=cutDims(p);return {name:p.id,w:d[2],h:d[1],grain:!!p.grain,tone:p.tone||"carcass",dl:d[2],dw:d[1]}});
+    if(!parts.length)continue;
+    const sheet=mat.sheet(model.p);
+    out[m]={sheet,result:packSheets(parts,sheet.w,sheet.h,kerf)};
+  }
+  return out;
+}
+
+// Generic checks every plan gets: no two solid parts overlap, every part fits its sheet.
+function genericChecks(plan,model,kerf){
+  const E=1e-6, res=[];
+  const solid=model.parts.filter(p=>p.role!=="ref"&&!p.nests);   // nests: sits in a groove or dado inside its neighbours on purpose
+  const bad=[];
+  for(let i=0;i<solid.length;i++)for(let j=i+1;j<solid.length;j++){
+    const a=solid[i],b=solid[j],A0=lo(a),A1=hi(a),B0=lo(b),B1=hi(b);
+    const o=[0,1,2].map(k=>Math.min(A1[k],B1[k])-Math.max(A0[k],B0[k]));
+    if(o.every(v=>v>E))bad.push(`${a.id} / ${b.id}`);
+  }
+  res.push({name:"No parts overlap",ok:!bad.length,detail:bad.length?bad.join("; "):`${solid.length} parts checked`});
+  const L=sheetLayouts(plan,model,kerf);
+  for(const [m,{sheet,result}] of Object.entries(L)){
+    res.push({name:`All ${plan.materials[m].name} parts fit`,ok:!result.unplaced.length,
+      detail:result.unplaced.length?`Too big: ${result.unplaced.map(p=>p.name).join(", ")}`:`${result.sheets.length} × ${sheet.name}`});
+  }
+  return res;
+}
+
+const api={frac,cutDims,cutRows,packSheets,sheetLayouts,genericChecks,lo,hi};
+if(typeof module!=="undefined"&&module.exports)module.exports=api; else root.ShopCore=api;
+})(typeof window!=="undefined"?window:globalThis);
+
+</script>
+<script>
+// Template plan: a plywood bench (top, two legs, a stretcher). Copy this folder to start a new plan.
+// Format reference: docs/PLAN-FORMAT.md. Units: inches. Axes: x = length, y = depth (front 0 to back), z = up.
+(function(root){
+"use strict";
+const PLAN={
+  id:"plywood-bench",
+  title:"Plywood Bench",
+  kerfParam:"kf",
+  params:[
+    {id:"L",label:"Length",value:42,step:0.25,group:"Size (inches)"},
+    {id:"D",label:"Depth",value:14,step:0.25,group:"Size (inches)"},
+    {id:"H",label:"Height",value:18,step:0.25,group:"Size (inches)"},
+    {id:"inset",label:"Leg inset from ends",value:3,step:0.25,group:"Size (inches)"},
+    {id:"kf",label:"Saw kerf",value:0.125,step:0.03125,group:"Stock"},
+    {id:"t",label:'¾" ply, measured',value:0.75,step:0.001,group:"Stock"},
+  ],
+  materials:{ply34:{name:'¾" plywood',thick:p=>p.t,sheet:()=>({name:"4×8",w:96,h:48})}},
+  toggles:[],
+
+  model(p){
+    const T=p.t, legH=p.H-T, sh=4;   // stretcher height
+    const parts=[];
+    const cut=(id,box,x={})=>parts.push({id,role:"cut",material:"ply34",box,tone:"carcass",...x});
+    cut("Top",[0,0,legH,p.L,p.D,T],{tone:"top",explode:[0,0,1]});
+    cut("Leg L",[p.inset,0,0,T,p.D,legH],{explode:[-1,0,0]});
+    cut("Leg R",[p.L-p.inset-T,0,0,T,p.D,legH],{explode:[1,0,0]});
+    cut("Stretcher",[p.inset+T,p.D/2-T/2,legH-sh,p.L-2*p.inset-2*T,T,sh],{explode:[0,0,-1]});
+    const f=ShopCore.frac;
+    return {p,parts,dims:{T,legH,sh},summary:[`Overall ${f(p.L)} L × ${f(p.D)} D × ${f(p.H)} H`],warnings:p.inset<2?["Legs this close to the ends make the top easy to tip."]:[]};
+  },
+
+  checks(m){
+    const P=Object.fromEntries(m.parts.map(q=>[q.id,q]));
+    const span=P["Leg R"].box[0]-(P["Leg L"].box[0]+m.dims.T);
+    return [{name:"Top span between legs ≤ 36\"",ok:span<=36,detail:`${span.toFixed(2)}" unsupported span`}];
+  },
+
+  notes:{ply34:()=>"T × W × L. Thickness is what you entered as measured.",sheets:()=>"Gaps between parts are the saw kerf."},
+
+  steps(m,h){
+    const f=h.f, d=m.dims;
+    return [
+      {title:"Before you start",hw:[["≈16",'#8 × 1⅝" screws'],["—","Glue"]],tools:["Saw","Drill / driver","Countersink bit","2 bar clamps"],
+        acts:[`Measure the plywood. Enter its thickness above if it is not ¾".`,`Cut every part and label it in pencil.`]},
+      {title:"Stretcher between the legs",need:["Leg L","Leg R","Stretcher"],hw:[["4",'#8 × 1⅝" screws'],["—","Glue"]],tools:["Countersink bit","Clamps"],
+        fig:{show:["Leg","Stretcher"],hi:["Stretcher"],labels:["Leg L","Leg R","Stretcher"],explode:{"Stretcher":[0,0,-3]},cap:"Stretcher centered, flush with the leg tops"},
+        acts:[`Glue the <b>Stretcher</b> between the legs, centered front to back, its top flush with the leg tops.`,`Screw through each leg into the stretcher ends.`]},
+      {title:"Top",need:["Top"],hw:[["≈12",'#8 × 1⅝" screws'],["—","Glue"]],tools:["Countersink bit","Square"],
+        fig:{hi:["Top"],labels:["Top"],explode:{"Top":[0,0,3]},cap:"Top overhangs the legs equally at both ends"},
+        acts:[`Set the <b>Top</b> on, overhanging each leg by <b>${f(m.p.inset)}</b>.`,`Glue and screw down into the leg edges and the stretcher.`]},
+    ];
+  },
+  sweep:{L:[36,42,48],D:[12,14],t:[0.75,0.71875]},
+};
+if(typeof module!=="undefined"&&module.exports)module.exports=PLAN; else root.PLAN=PLAN;
+})(typeof window!=="undefined"?window:globalThis);
+
+</script>
+<script>
+// shop-plans engine: renders any plan (window.PLAN) into a 3D viewer, cut lists, checks,
+// one-step-per-page instructions with illustrations, and sheet layouts. Needs three.js r128 + OrbitControls.
+(function(){
+"use strict";
+const C=window.ShopCore, PLAN=window.PLAN, $=id=>document.getElementById(id);
+const frac=C.frac, f=x=>frac(x), f32=x=>frac(x,32);
+const V=(x,y,z)=>new THREE.Vector3(x,z,-y);   // plan inches (x right, y back, z up) -> three.js
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const match=(id,list)=>(list||[]).some(s=>id===s||id.startsWith(s));
+
+// ---------- Tones: one look per kind of part, shared by 3D, illustrations and sheet layouts ----------
+const TONES={carcass:0xd9bb8f,top:0xc79f6b,front:0xc49060,metal:0xa7acb2,glass:0x9cc9e6,accent:0x9a5b22};
+const mats={};
+for(const [k,c] of Object.entries(TONES))mats[k]=k==="glass"
+  ?new THREE.MeshStandardMaterial({color:c,transparent:true,opacity:.28,roughness:.1,depthWrite:false})
+  :new THREE.MeshStandardMaterial({color:c,roughness:k==="metal"?.35:.8,metalness:k==="metal"?.35:0});
+const ghostMat=new THREE.MeshStandardMaterial({color:0xd6cfc2,transparent:true,opacity:.28,depthWrite:false,roughness:.9});
+const ghostEdge=new THREE.LineBasicMaterial({color:0x7a7066,transparent:true,opacity:.35});
+const hiEdge=new THREE.LineBasicMaterial({color:0x6b3d12});
+const edgeMat=new THREE.LineBasicMaterial({color:0x3a2c1c,transparent:true,opacity:.45});
+
+// ---------- Page skeleton ----------
+document.title=PLAN.title;
+$("title").textContent=PLAN.title;
+
+// Parameters form, grouped.
+(function buildForm(){
+  const groups={};
+  for(const q of PLAN.params)(groups[q.group||"Settings"]||(groups[q.group||"Settings"]=[])).push(q);
+  let html="";
+  for(const [g,qs] of Object.entries(groups)){
+    html+=`<h2>${esc(g)}</h2>`;
+    const choice=qs.filter(q=>q.type==="choice"), nums=qs.filter(q=>q.type!=="choice");
+    for(const q of choice)html+=`<div class="stock" role="radiogroup" aria-label="${esc(q.label)}">${q.options.map(o=>`<label><input type="radio" name="p_${q.id}" value="${esc(o.value)}" ${o.value===q.value?"checked":""}> ${esc(o.label)}</label>`).join("")}</div>`;
+    if(nums.length)html+=`<div class="params">${nums.map(q=>`<label for="p_${q.id}">${esc(q.label)}<input id="p_${q.id}" type="number" step="${q.step||0.0625}" value="${q.value}"></label>`).join("")}</div>`;
+  }
+  $("params").innerHTML=html+`<div class="dims" id="dims"></div><div id="warns"></div>`;
+  $("toggles").innerHTML=(PLAN.toggles||[]).map(t=>`<label><input type="checkbox" id="tg_${t.id}" checked> ${esc(t.label)}</label>`).join("")+`<label>Explode <input type="range" id="explode" min="0" max="1" step="0.01" value="0"></label>`;
+})();
+function readParams(){
+  const p={};
+  for(const q of PLAN.params){
+    if(q.type==="choice"){const el=document.querySelector(`input[name="p_${q.id}"]:checked`);p[q.id]=el?el.value:q.value}
+    else{const v=parseFloat($("p_"+q.id).value);p[q.id]=isFinite(v)?v:q.value}
+  }
+  return p;
+}
+
+// ---------- 3D viewer ----------
+const stage=$("stage");
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));stage.prepend(renderer.domElement);
+const scene=new THREE.Scene(), cam=new THREE.PerspectiveCamera(35,1,1,2000);
+const ctl=new THREE.OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a7a66,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.65);sun.position.set(-30,60,50);scene.add(sun);
+const grid=new THREE.GridHelper(200,40,0x9a9080,0xb8b0a0);grid.material.opacity=.35;grid.material.transparent=true;scene.add(grid);
+let group=new THREE.Group(), meshes=[], framed=false;scene.add(group);
+function addBox(parent,b,mat,edge){
+  const g=new THREE.BoxGeometry(b[3],b[5],b[4]), m=new THREE.Mesh(g,mat);
+  m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),edge));
+  m.position.copy(V(b[0]+b[3]/2,b[1]+b[4]/2,b[2]+b[5]/2));parent.add(m);return m;
+}
+function render3d(model){
+  scene.remove(group);group=new THREE.Group();meshes=[];
+  for(const p of model.parts){const m=addBox(group,p.box,mats[p.tone]||mats.carcass,edgeMat);
+    m.userData={base:m.position.clone(),ex:V(...(p.explode||[0,0,0]).map(v=>v*6)),toggle:p.toggle};meshes.push(m)}
+  scene.add(group);
+  if(!framed){const b=new THREE.Box3().setFromObject(group),c=b.getCenter(new THREE.Vector3()),r=b.getBoundingSphere(new THREE.Sphere()).radius;
+    ctl.target.copy(c);cam.position.copy(c).add(new THREE.Vector3(-0.9*r,0.7*r,1.5*r));framed=true}
+  applyView();
+}
+function applyView(){
+  const e=+$("explode").value;
+  for(const m of meshes){m.position.copy(m.userData.base).addScaledVector(m.userData.ex,e);
+    if(m.userData.toggle){const t=$("tg_"+m.userData.toggle);m.visible=!t||t.checked}}
+}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(stage);
+(function loop(){ctl.update();renderer.render(scene,cam);requestAnimationFrame(loop)})();
+
+// ---------- Cut lists ----------
+function renderCutLists(model){
+  let html="";
+  for(const [m,mat] of Object.entries(PLAN.materials)){
+    const rows=C.cutRows(model,m);if(!rows.length)continue;
+    const grouped=rows.some(r=>r.qty>1);
+    html+=`<section class="cutlist"><h2>Cut list · ${esc(mat.name)}</h2><div class="tbl"><table><thead><tr><th>Part</th><th>Qty</th><th>T</th><th>W</th><th>L</th>${grouped?"<th>Labels</th>":""}</tr></thead><tbody>${
+      rows.map(r=>`<tr><td>${esc(r.name)}${r.note?" *":""}</td><td class="n">${r.qty}</td><td class="n">${frac(r.dims[0],32)}</td><td class="n">${f(r.dims[1])}</td><td class="n">${f(r.dims[2])}</td>${grouped?`<td class="lb">${r.qty>1?esc(r.labels.join(", ")):""}</td>`:""}</tr>`).join("")
+    }</tbody></table></div>${PLAN.notes&&PLAN.notes[m]?`<p class="note">${PLAN.notes[m](model)}</p>`:""}</section>`;
+  }
+  $("cutlists").innerHTML=html;
+}
+
+// ---------- Checks ----------
+function renderChecks(model){
+  const kerf=model.p[PLAN.kerfParam]||0.125;
+  const list=[...C.genericChecks(PLAN,model,kerf),...(PLAN.checks?PLAN.checks(model):[])];
+  const bad=list.filter(c=>!c.ok).length;
+  $("checks").innerHTML=`<h2>Checks · ${bad?`${bad} failing`:"all pass"}</h2><ul class="checklist">${list.map(c=>`<li class="${c.ok?"ok":"bad"}"><span class="ck">${c.ok?"✓":"✗"}</span><span>${esc(c.name)}</span><span class="cd">${esc(c.detail||"")}</span></li>`).join("")}</ul>`;
+}
+
+// ---------- Instructions: one step per page ----------
+let curStep=0, showAll=false, wired=false;
+function renderSteps(model){
+  const steps=PLAN.steps(model,{f,f32});
+  const P=Object.fromEntries(model.parts.map(q=>[q.id,q]));
+  const sz=id=>{const q=P[id];if(!q)return"";const d=C.cutDims(q);return `${frac(d[0],32)} × ${f(d[1])} × ${f(d[2])}`};
+  const need=st=>{
+    let h="";
+    if(st.need&&st.need.length)h+=`<div><h4>Parts</h4><ul class="need-parts">${st.need.map(it=>{
+      if(it.labels)return `<li><span class="lab">×${it.labels.length}</span><span class="dm">${sz(it.labels[0])}</span><span class="grp">${esc(it.labels.join(" · "))}</span></li>`;
+      const [lab,note]=Array.isArray(it)?it:[it,""];
+      return `<li><span class="lab">${esc(lab)}</span><span class="dm">${sz(lab)}</span>${note?`<span class="nt">${esc(note)}</span>`:""}</li>`}).join("")}</ul></div>`;
+    if(st.hw&&st.hw.length)h+=`<div><h4>Hardware</h4><ul class="need-hw">${st.hw.map(([qy,it])=>`<li><span class="qty">${qy==="—"?"":/^\d+$/.test(qy)?"×"+qy:qy}</span><span>${esc(it)}</span></li>`).join("")}</ul></div>`;
+    if(st.tools&&st.tools.length)h+=`<div><h4>Tools</h4><ul class="need-tools">${st.tools.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`;
+    return h;
+  };
+  const total=steps.length;
+  const cards=steps.map((st,i)=>`<article class="stepcard" id="step-${i}" data-i="${i}" aria-label="Step ${i}: ${esc(st.title)}">
+  <header class="sc-head"><span class="sc-num">${i}</span><div class="sc-titles"><span class="sc-eyebrow">Step ${i} of ${total-1}</span><h3>${esc(st.title)}</h3></div></header>
+  <div class="sc-body${st.fig?"":" sc-body--plain"}">
+    <aside class="sc-need">${need(st)}</aside>
+    ${st.fig?`<figure class="sc-fig"><img data-step="${i}" alt="${esc(st.fig.cap||st.title)}"><figcaption>${esc(st.fig.cap||"")}</figcaption></figure>`:""}
+  </div>
+  <ol class="sc-acts">${st.acts.map(a=>`<li><span>${a}</span></li>`).join("")}</ol>
+</article>`).join("");
+  $("assembly").innerHTML=`<div class="stepper" id="stepper"><nav class="stepnav" aria-label="Steps">
+    <button type="button" class="sn-btn" id="snPrev" aria-label="Previous step">←</button>
+    <div class="sn-dots">${steps.map((st,i)=>`<button type="button" class="sn-dot" data-i="${i}" aria-label="Step ${i}: ${esc(st.title)}">${i}</button>`).join("")}</div>
+    <button type="button" class="sn-btn" id="snNext" aria-label="Next step">→</button>
+    <button type="button" class="sn-all" id="snAll" aria-pressed="false">All steps</button></nav>${cards}</div>`;
+  wireStepper(total);
+  queueIllustrations(model,steps);
+}
+function wireStepper(total){
+  const root=$("stepper");
+  if(!wired){const m=/^#step-(\d+)$/.exec(location.hash||"");if(m)curStep=+m[1];wired=true}
+  const go=i=>{curStep=Math.max(0,Math.min(total-1,i));
+    root.querySelectorAll(".stepcard").forEach(c=>c.classList.toggle("on",+c.dataset.i===curStep));
+    root.querySelectorAll(".sn-dot").forEach(b=>{const on=+b.dataset.i===curStep;b.classList.toggle("on",on);b.setAttribute("aria-current",on?"step":"false")});
+    $("snPrev").disabled=curStep===0;$("snNext").disabled=curStep===total-1};
+  root.classList.toggle("all",showAll);$("snAll").setAttribute("aria-pressed",String(showAll));
+  root.querySelectorAll(".sn-dot").forEach(b=>b.onclick=()=>go(+b.dataset.i));
+  $("snPrev").onclick=()=>go(curStep-1);$("snNext").onclick=()=>go(curStep+1);
+  $("snAll").onclick=()=>{showAll=!showAll;root.classList.toggle("all",showAll);$("snAll").setAttribute("aria-pressed",String(showAll))};
+  go(curStep);
+}
+document.addEventListener("keydown",e=>{
+  if(e.target.closest&&e.target.closest("input,textarea,select")||showAll)return;
+  if(e.key==="ArrowRight"&&$("snNext"))$("snNext").click();
+  if(e.key==="ArrowLeft"&&$("snPrev"))$("snPrev").click();
+});
+addEventListener("hashchange",()=>{const m=/^#step-(\d+)$/.exec(location.hash);if(m){const b=document.querySelector(`.sn-dot[data-i="${m[1]}"]`);if(b)b.click()}});
+
+// ---------- Illustrations ----------
+// Each figure is drawn from the model: new parts in full color, earlier parts as ghosts,
+// IDs in the white space with hairline leaders. Labels are never printed on the parts.
+const IW=1440, IH=780;
+const VIEWS={front:[-0.5,-1,0.75],back:[0.55,1,0.65],box:[-0.8,-1,0.9],tank:[-0.45,-1,0.6],bench:[-0.3,-1,1.25],top:[-0.2,-0.6,1.6]};
+let illR=null, illT=null, CALL=[], FL=[];
+function queueIllustrations(model,steps){clearTimeout(illT);illT=setTimeout(()=>renderIllustrations(model,steps),250)}
+function fitCamera(sc,cam,dir,pad){
+  const box=new THREE.Box3();sc.traverse(o=>{if(o.isMesh)box.expandByObject(o)});
+  const c=box.getCenter(new THREE.Vector3()), r=box.getBoundingSphere(new THREE.Sphere()).radius, u=dir.clone().normalize(), pts=[];
+  for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z])pts.push(new THREE.Vector3(x,y,z));
+  let lo=r*0.3,hi=r*8,dist=hi;
+  for(let i=0;i<30;i++){const m=(lo+hi)/2;cam.position.copy(c).addScaledVector(u,m);cam.lookAt(c);cam.near=m/50;cam.far=m*4;cam.updateProjectionMatrix();cam.updateMatrixWorld();
+    const ext=Math.max(...pts.map(p=>{const v=p.clone().project(cam);return Math.max(Math.abs(v.x),Math.abs(v.y))}));
+    if(ext>0.88/pad)lo=m;else{hi=m;dist=m}}
+  cam.position.copy(c).addScaledVector(u,dist);cam.lookAt(c);cam.near=dist/50;cam.far=dist*4;cam.updateProjectionMatrix();
+}
+// Pick a visible point on each labeled part (raycast past anything opaque in front of it).
+function partAnchors(cam,sc){
+  const opaque=[];sc.traverse(o=>{if(o.isMesh&&!o.material.transparent)opaque.push(o)});
+  const ray=new THREE.Raycaster();
+  const seen=(m,w)=>{const dir=w.clone().sub(cam.position),d=dir.length();ray.set(cam.position,dir.normalize());ray.far=d+0.01;
+    const hit=ray.intersectObjects(opaque,false)[0];return !hit||hit.object===m||hit.distance>d-0.05};
+  for(const L of FL){
+    const m=L.mesh, pr=m.geometry.parameters, half=[pr.width/2,pr.height/2,pr.depth/2];
+    let best=null;
+    for(let ax=0;ax<3;ax++)for(const sg of [1,-1]){
+      const n=new THREE.Vector3();n.setComponent(ax,sg);
+      const cL=n.clone().multiplyScalar(half[ax]), cW=m.localToWorld(cL.clone()), nW=m.localToWorld(cL.clone().add(n)).sub(cW);
+      if(nW.dot(cam.position.clone().sub(cW))<=0)continue;
+      const others=[0,1,2].filter(i=>i!==ax);
+      const sp=v=>{const q=v.clone().project(cam);return new THREE.Vector2(q.x,q.y)};
+      const cs=[[1,1],[1,-1],[-1,-1],[-1,1]].map(([a,b])=>{const v=cL.clone();v.setComponent(others[0],half[others[0]]*a);v.setComponent(others[1],half[others[1]]*b);return sp(m.localToWorld(v))});
+      let area=0;for(let i=0;i<4;i++){const p=cs[i],q=cs[(i+1)%4];area+=p.x*q.y-q.x*p.y}area=Math.abs(area);
+      if(!best||area>best.area)best={area,cL,others};
+    }
+    let anchor=m.localToWorld(new THREE.Vector3());
+    if(best)for(const [a,b] of [[0,0],[.3,.3],[-.3,-.3],[.3,-.3],[-.3,.3],[.42,0],[-.42,0],[0,.42],[0,-.42]]){
+      const v=best.cL.clone();v.setComponent(best.others[0],v.getComponent(best.others[0])+a*half[best.others[0]]*2);v.setComponent(best.others[1],v.getComponent(best.others[1])+b*half[best.others[1]]*2);
+      const w=m.localToWorld(v);if(seen(m,w)){anchor=w;break}}
+    const [t,...rest]=L.text.split(" · ");CALL.push({world:anchor,t,sub:rest.join(" · ")});
+  }
+}
+function drawCallouts(sc,cam){
+  const c=document.createElement("canvas");c.width=IW;c.height=IH;const g=c.getContext("2d"),u=IW/960;
+  g.drawImage(illR.domElement,0,0);
+  partAnchors(cam,sc);
+  const box=new THREE.Box3();sc.traverse(o=>{if(o.isMesh)box.expandByObject(o)});
+  let minX=IW,maxX=0;
+  for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){const v=new THREE.Vector3(x,y,z).project(cam),sx=(v.x+1)/2*IW;minX=Math.min(minX,sx);maxX=Math.max(maxX,sx)}
+  const tf=`500 ${Math.round(25*u)}px "Source Sans 3",system-ui,sans-serif`, sf=`400 ${Math.round(19*u)}px "IBM Plex Mono",ui-monospace,monospace`;
+  const items=CALL.map(k=>{const v=(k.world?k.world.clone():k.obj.localToWorld(k.p.clone())).project(cam);
+    const sx=(v.x+1)/2*IW,sy=(1-v.y)/2*IH;g.font=tf;let w=g.measureText(k.t).width;if(k.sub){g.font=sf;w=Math.max(w,g.measureText(k.sub).width)}
+    return {...k,sx,sy,w,h:(k.sub?56:32)*u}});
+  const mid=(minX+maxX)/2;
+  for(const side of ["L","R"]){
+    const list=items.filter(i=>(i.sx<mid)===(side==="L")).sort((a,b)=>a.sy-b.sy);
+    const gap=12*u,top=22*u,bot=IH-22*u;let y=top;
+    for(const i of list){i.ly=Math.max(i.sy-i.h/2,y);y=i.ly+i.h+gap}
+    const over=y-gap-bot;if(over>0)for(const i of list)i.ly-=over;
+    for(const i of list){
+      const colX=side==="L"?Math.max(minX-34*u,i.w+18*u):Math.min(maxX+34*u,IW-i.w-18*u);
+      const elbowX=side==="L"?colX+26*u:colX-26*u, ty=i.ly+15*u;
+      g.strokeStyle="#22211d";g.lineWidth=1*u;g.beginPath();g.moveTo(i.sx,i.sy);g.lineTo(elbowX,ty);g.lineTo(side==="L"?colX+6*u:colX-6*u,ty);g.stroke();
+      g.fillStyle="#22211d";g.beginPath();g.arc(i.sx,i.sy,2.6*u,0,Math.PI*2);g.fill();
+      g.textAlign=side==="L"?"right":"left";g.textBaseline="middle";
+      g.font=tf;g.fillStyle="#1b1a17";g.fillText(i.t,colX,ty);
+      if(i.sub){g.font=sf;g.fillStyle="#5e5a52";g.fillText(i.sub,colX,ty+26*u)}
+    }
+  }
+  return c.toDataURL("image/png");
+}
+function renderIllustrations(model,steps){
+  const imgs=[...document.querySelectorAll("img[data-step]")];if(!imgs.length)return;
+  if(!illR){illR=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true});illR.setPixelRatio(1);illR.setSize(IW,IH,false);illR.setClearColor(0xffffff,1)}
+  const P=Object.fromEntries(model.parts.map(q=>[q.id,q]));
+  for(const img of imgs){
+    const fig=steps[+img.dataset.step].fig;if(!fig)continue;
+    CALL=[];FL=[];
+    const sc=new THREE.Scene(), root=new THREE.Group();sc.add(root);
+    sc.add(new THREE.HemisphereLight(0xffffff,0x8a7a66,.9));const s=new THREE.DirectionalLight(0xffffff,.6);s.position.set(-30,60,50);sc.add(s);
+    const cam=new THREE.PerspectiveCamera(32,IW/IH,1,1000);
+    const list=fig.parts?fig.parts.map(q=>({...q,hi:true}))
+      :model.parts.filter(q=>(fig.show?match(q.id,fig.show):true)&&!match(q.id,fig.hide)).map(q=>({...q,hi:match(q.id,fig.hi)}));
+    for(const q of list){
+      const ex=(fig.explode||{})[q.id]||[0,0,0], b=[q.box[0]+ex[0],q.box[1]+ex[1],q.box[2]+ex[2],q.box[3],q.box[4],q.box[5]];
+      const mesh=addBox(root,b,q.hi?(mats[q.tone]||mats.carcass):(q.tone==="glass"?mats.glass:ghostMat),q.hi?hiEdge:ghostEdge);
+      if((fig.labels||[]).includes(q.id))FL.push({mesh,text:q.label||q.id});
+    }
+    for(const x of fig.extra||[])addBox(root,x.box,new THREE.MeshBasicMaterial({color:TONES[x.tone]||TONES.accent}),hiEdge);
+    for(const n of fig.notes||[]){
+      let at=n.at;
+      if(n.on&&P[n.on]){const b=P[n.on].box,fr=n.frac||[.5,.5,.5],sh=n.shift||[0,0,0];at=[b[0]+b[3]*fr[0]+sh[0],b[1]+b[4]*fr[1]+sh[1],b[2]+b[5]*fr[2]+sh[2]]}
+      const [t,...rest]=n.text.split(" · ");CALL.push({obj:root,p:V(...at),t,sub:rest.join(" · ")});
+    }
+    if(fig.flip){const b=new THREE.Box3().setFromObject(root),c=b.getCenter(new THREE.Vector3()),pv=new THREE.Group();pv.position.copy(c);sc.add(pv);root.position.sub(c);pv.add(root);pv.rotation.z=Math.PI}
+    sc.updateMatrixWorld(true);
+    const dir=Array.isArray(fig.view)?fig.view:VIEWS[fig.view||"front"];
+    fitCamera(sc,cam,V(...dir),fig.pad||(fig.labels||fig.notes?1.5:1.1));
+    sc.updateMatrixWorld(true);illR.render(sc,cam);
+    img.src=drawCallouts(sc,cam);
+    sc.traverse(o=>{if(o.geometry)o.geometry.dispose()});
+  }
+}
+
+// ---------- Sheet layouts ----------
+function sheetSVG(label,W,H,res){
+  const m=3.2, vb=`${-m} ${-m} ${W+m+2} ${H+m+0.6}`, fs=W>60?1.5:1.1;
+  let out="";
+  res.sheets.forEach((sh,si)=>{
+    let g=`<svg class="sheet-svg" viewBox="${vb}" role="img" aria-label="${esc(label)} sheet ${si+1} layout"><defs><pattern id="waste" width="2" height="2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="sv-waste-bg" width="2" height="2"/><line class="sv-hatch" x1="0" y1="0" x2="0" y2="2"/></pattern></defs><rect class="sv-sheet" x="0" y="0" width="${W}" height="${H}"/>`;
+    for(let x=0;x<=W;x+=12)g+=`<line class="sv-tick" x1="${x}" y1="-1" x2="${x}" y2="0"/><text class="sv-ruler" x="${x}" y="-1.5" text-anchor="middle" style="font-size:${fs}px">${x}</text>`;
+    for(let y=0;y<=H;y+=12)g+=`<line class="sv-tick" x1="-1" y1="${y}" x2="0" y2="${y}"/><text class="sv-ruler" x="-1.4" y="${y+fs*0.35}" text-anchor="end" style="font-size:${fs}px">${y}</text>`;
+    for(const p of sh.placed){
+      g+=`<rect class="sv-part sv-${p.tone}" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}"/>`;
+      const vert=p.h>p.w,long=Math.max(p.w,p.h),short=Math.min(p.w,p.h),fz=Math.min(W>60?1.9:1.5,short*0.24,long/9),cx=p.x+p.w/2,cy=p.y+p.h/2;
+      const tr=vert?` transform="rotate(-90 ${cx} ${cy})"`:"", dims=`${f(p.dw).replace(/"/g,"")} × ${f(p.dl).replace(/"/g,"")}`;
+      if(short>=fz*2.6)g+=`<text class="sv-name" x="${cx}" y="${cy-fz*0.15}" text-anchor="middle" style="font-size:${fz}px"${tr}>${esc(p.name)}</text><text class="sv-dim" x="${cx}" y="${cy+fz*1.05}" text-anchor="middle" style="font-size:${fz*0.85}px"${tr}>${dims}</text>`;
+      else g+=`<text class="sv-name" x="${cx}" y="${cy+fz*0.35}" text-anchor="middle" style="font-size:${fz}px"${tr}>${esc(p.name)} · ${dims}</text>`;
+    }
+    const used=sh.placed.reduce((a,p)=>a+p.w*p.h,0);
+    out+=`<figure><figcaption><span>${esc(label)}${res.sheets.length>1?` · sheet ${si+1} of ${res.sheets.length}`:""}</span><span>${Math.round(100*used/(W*H))}% used</span></figcaption>${g}</svg></figure>`;
+  });
+  if(res.unplaced.length)out+=`<p class="warn">Too big for this sheet: ${esc(res.unplaced.map(p=>p.name).join(", "))}.</p>`;
+  return out;
+}
+function renderSheets(model){
+  const L=C.sheetLayouts(PLAN,model,model.p[PLAN.kerfParam]||0.125);
+  const tones=new Set();
+  let html="";
+  for(const [m,{sheet,result}] of Object.entries(L)){
+    result.sheets.forEach(s=>s.placed.forEach(p=>tones.add(p.tone)));
+    html+=`<div class="sheetgroup${sheet.w>60||result.sheets.length>1?" wide":""}">${sheetSVG(`${PLAN.materials[m].name} · ${sheet.name}`,sheet.w,sheet.h,result)}</div>`;
+  }
+  const names={carcass:"Carcass and box parts",top:"Top layers and bottoms",front:"Fronts (grain runs the long way)"};
+  $("legend").innerHTML=[...tones].map(t=>`<span><i class="sw sv-${t}"></i>${names[t]||t}</span>`).join("")+`<span><i class="sw sw-off"></i>Offcut</span>`;
+  $("sheetlist").innerHTML=html;
+  $("sheetnote").innerHTML=PLAN.notes&&PLAN.notes.sheets?PLAN.notes.sheets(model):"";
+}
+
+// ---------- Update ----------
+function update(){
+  const model=PLAN.model(readParams());
+  for(const q of PLAN.params)if(q.derivedWhen){const el=$("p_"+q.id),on=q.derivedWhen(model.p);el.disabled=on;if(on)el.value=+model.p[q.id].toFixed(4)}
+  $("sub").textContent=model.summary[0].replace(/^Overall\s+/,"");
+  $("dims").innerHTML=model.summary.map(s=>`<span>${esc(s)}</span>`).join("");
+  $("warns").innerHTML=(model.warnings||[]).map(w=>`<p class="warn">${esc(w)}</p>`).join("");
+  render3d(model);renderCutLists(model);renderChecks(model);renderSteps(model);renderSheets(model);
+  window.SHOP_MODEL=model;
+}
+document.addEventListener("input",e=>{if(e.target.closest("#params"))update();if(e.target.closest("#toggles"))applyView()});
+document.addEventListener("change",e=>{if(e.target.closest("#params"))update()});
+
+// Print: copy the 3D view into an <img>, because WebGL canvases often print blank.
+function snapshot(){if(!renderer.domElement.width||!stage.clientWidth)return;try{renderer.render(scene,cam);$("snap").src=renderer.domElement.toDataURL("image/png")}catch(e){}}
+addEventListener("beforeprint",snapshot);
+let snapT;const queueSnap=()=>{clearTimeout(snapT);snapT=setTimeout(snapshot,400)};
+ctl.addEventListener("end",queueSnap);document.addEventListener("change",queueSnap);
+update();resize();queueSnap();
+})();
+
+</script>
